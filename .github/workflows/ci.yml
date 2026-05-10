@@ -131,7 +131,7 @@ jobs:
           docker rm -f test-api
 
       - name: Log in to ghcr.io
-        if: env.ACT != 'true' && (github.event.inputs.push_to_registry == 'true' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+        if: env.ACT != 'true' && github.event.inputs.push_to_registry == 'true'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -139,7 +139,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Tag and push image
-        if: env.ACT != 'true' && (github.event.inputs.push_to_registry == 'true' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+        if: env.ACT != 'true' && github.event.inputs.push_to_registry == 'true'
         run: |
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           docker tag heart-disease-api:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
