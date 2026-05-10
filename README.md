@@ -244,7 +244,6 @@ See [Prerequisites](#prerequisites) and [Quick Start](#quick-start) above. Summa
 
 ### EDA and Modelling Choices
 
-<!-- TODO: paste key EDA findings and model selection rationale here, or reference report.md -->
 
 See [`report.md` §3–4](./report.md) for the full write-up. Key points:
 
@@ -255,8 +254,6 @@ See [`report.md` §3–4](./report.md) for the full write-up. Key points:
 - **Selection:** Logistic Regression (`C=1.0`) — highest CV ROC-AUC (0.9039), honest holdout test ROC-AUC **0.9675**, lower variance, faster inference, more interpretable.
 
 ### Experiment Tracking Summary
-
-<!-- TODO: add MLflow UI screenshots here -->
 
 - **Tool:** MLflow (tracking server deployed in K8s at `http://localhost:5001`, SQLite backend, proxy-served artifacts).
 - **Per run logged:** params (all grid candidates via autolog), 85+ metrics (train/test/CV/per-fold/per-class + evaluator-generated), signatures, input examples, dataset lineage (`mlflow.data`), calibration/lift/PR/ROC plots, classification report, predictions table, `cv_results.csv`.
@@ -270,24 +267,6 @@ See [Architecture](#architecture) above (Mermaid diagram renders on GitHub). The
 - `mlops-app` — FastAPI (2 replicas) behind a LoadBalancer.
 - `mlops-tracking` — MLflow server (SQLite + proxy artifact serving).
 - `mlops-monitoring` — Prometheus + Grafana (auto-provisioned datasource and dashboard).
-
-<!-- TODO: add exported diagram image to screenshots/ if needed for the .docx report -->
-
-### CI/CD and Deployment Workflow Screenshots
-
-<!-- TODO: add screenshots to screenshots/ and reference them below -->
-
-| Screenshot | Description |
-| --- | --- |
-| `screenshots/ci-green.png` | GitHub Actions CI job passing (lint → download → test → train → model tests) |
-| `screenshots/cd-smoke-test.png` | CD job: Docker build + container smoke test (`/health`, `/predict`) |
-| `screenshots/k8s-pods.png` | `kubectl get pods -A` showing all pods running |
-| `screenshots/swagger-ui.png` | FastAPI Swagger UI at `/docs` |
-| `screenshots/predict-curl.png` | Successful `/predict` curl response |
-| `screenshots/mlflow-runs.png` | MLflow UI — experiment runs with parent/child structure |
-| `screenshots/mlflow-registry.png` | MLflow Model Registry — `heart-disease-classifier @champion` |
-| `screenshots/grafana-dashboard.png` | Grafana "Heart Disease API Monitoring" dashboard |
-| `screenshots/prometheus-targets.png` | Prometheus targets showing the API scrape endpoint healthy |
 
 ### Link to Code Repository
 
