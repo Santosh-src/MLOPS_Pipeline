@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow-server
+  namespace: mlops-tracking
+  labels:
+    app: mlflow-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mlflow-server
+  template:
+    metadata:
+      labels:
+        app: mlflow-server
+    spec:
+      containers:
+        - name: mlflow
+          image: ghcr.io/mlflow/mlflow:v3.11.1-full
+          imagePullPolicy: IfNotPresent
+          command: ["mlflow", "server"]
+          args:
+            - --host=0.0.0.0
+            - --port=5000
+            - --backend-store-uri=sqlite:///mlflow/mlflow.db
+            # Proxy artifact serving: the server stores artifacts under
+            # --artifacts-destination and serves them over HTTP via
+            # mlflow-artifacts:/ URLs, so remote clients never need
+            # filesystem access to /mlflow.
+            - --serve-artifacts
+            - --artifacts-destination=/mlflow/artifacts
+            # MLflow 3.11+ security middleware: explicit allow-list for kubelet probe IPs and cross-namespace traffic.
+            - --allowed-hosts=*
+            - --cors-allowed-origins=*
+            # Single worker required for the default SQLite backend (multi-worker races on first-time DB creation).
+            - --workers=1
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1.5Gi"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 24
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          volumeMounts:
+            - name: mlflow-storage
+              mountPath: /mlflow
+      volumes:
+        - name: mlflow-storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow-server
+  namespace: mlops-tracking
+  labels:
+    app: mlflow-server
+spec:
+  type: LoadBalancer
+  selector:
+    app: mlflow-server
+  ports:
+    - protocol: TCP
+      # Externally exposed on 5001 to avoid conflict with macOS AirPlay Receiver
+      # which binds to 5000 by default. Container still listens on 5000 internally.
+      port: 5001
+      targetPort: 5000

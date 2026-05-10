@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Generated artifacts
+model/*.joblib
+model/*.json
+dataprocessing/processed_cleveland.csv
+test-results-*.xml
+
+# Binaries / caches
+kubectl
+.cache/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
